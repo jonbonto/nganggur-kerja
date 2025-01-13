@@ -10,80 +10,147 @@ generator client {
 
 // Define the provider schema for managing users and related data
 model User {
-  id             Int        @id @default(autoincrement())
-  email          String     @unique
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
   name           String?
-  emailVerified  DateTime?  // To store email verification date
+  emailVerified  DateTime? // To store email verification date
   hashedPassword String?
-  role           String   @default("user")  // Default to "user"
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  role           String           @default("user") // Default to "user"
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   // Other fields as necessary
   passwordResets PasswordReset[]
   // Jobs posted by the user (if they're an employer)
-  postedJobs    Job[]
+  postedJobs     Job[]
   // Job applications made by the user
-  applications  JobApplication[]
+  applications   JobApplication[]
+  jobViews       JobView[]
+  savedJobs      SavedJob[]
+  jobAlerts      JobAlert[]
+  uploadHistories  UploadHistory[]
 
-   @@map("users") // Custom table name as plural
+  @@map("users") // Custom table name as plural
 }
 
 model VerificationToken {
   identifier String
-  token      String @unique
+  token      String   @unique
   expires    DateTime
 
-   @@map("verification_tokens") // Custom table name as plural
+  @@map("verification_tokens") // Custom table name as plural
 }
 
 model PasswordReset {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   email     String
-  token     String    @unique
+  token     String   @unique
   expiresAt DateTime
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user      User      @relation(fields: [email], references: [email])
+  user User @relation(fields: [email], references: [email])
+
   @@map("password_reset") // Custom table name as plural
 }
 
 model Job {
-  id          Int      @id @default(autoincrement())
-  title       String
-  company     String
-  category    String
-  description String
-  salary      String?
-  location    String
+  id           Int      @id @default(autoincrement())
+  title        String
+  company      String
+  category     String
+  description  String
+  salary       String?
+  location     String
   requirements String[]
-  benefits    String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  benefits     String[]
+  views        Int      @default(0) // Optional: Track view
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relation to JobApplication
   applications JobApplication[]
 
   // User who posted the job
-  postedBy    User     @relation(fields: [postedById], references: [id])
-  postedById  Int
+  postedBy   User       @relation(fields: [postedById], references: [id])
+  postedById Int
+  jobViews   JobView[]
+  savedJobs  SavedJob[]
 
   @@map("jobs")
 }
 
 model JobApplication {
-  id             Int      @id @default(autoincrement())
-  userId         Int      // Foreign key to user who is applying
-  jobId          Int      // Foreign key to job being applied to
-  coverLetter    String?
-  resumeUrl      String?
-  status         String   // status could be "pending", "accepted", "rejected"
-  appliedAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  userId      Int // Foreign key to user who is applying
+  jobId       Int // Foreign key to job being applied to
+  coverLetter String?
+  resumeUrl   String?
+  status      String // status could be "pending", "accepted", "rejected"
+  appliedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  user           User     @relation(fields: [userId], references: [id])
-  job            Job      @relation(fields: [jobId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  job  Job  @relation(fields: [jobId], references: [id])
 
+  @@unique([jobId, userId]) // Composite unique constraint
   @@map("job_applications")
-  @@unique([jobId, userId])  // Composite unique constraint
+}
+
+model JobView {
+  id       Int      @id @default(autoincrement())
+  jobId    Int
+  userId   Int
+  viewedAt DateTime @default(now())
+  location String? // Geolocation (city, country)
+  device   String? // Device type (mobile, desktop)
+  referrer String? // Referrer URL (if available)
+
+  job  Job  @relation(fields: [jobId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([jobId, userId]) // Ensures a user can only view a job once
+  @@map("job_views")
+}
+
+model SavedJob {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  jobId   Int
+  savedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  job  Job  @relation(fields: [jobId], references: [id])
+
+  @@unique([userId, jobId]) // Prevent duplicate saves
+  @@map("saved_jobs")
+}
+
+model JobAlert {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  criteria  Json // Stores search criteria (e.g., category, location)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("job_alerts")
+}
+
+model UploadHistory {
+  id        Int      @id @default(autoincrement())
+  filename  String
+  status    String   @default("in_progress") // in_progress, completed, failed
+  total     Int      @default(0)
+  success   Int      @default(0)
+  errors    Int      @default(0)
+  errorFile String? // Path to error file
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to the creator
+  creator   User @relation(fields: [creatorId], references: [id])
+  creatorId Int
+
+  @@map("upload_history")
 }

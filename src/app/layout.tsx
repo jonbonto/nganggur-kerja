@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from "@/components/Footer";
 import "./globals.css";
 import SessionWrapper from "@/components/SessionWrapper";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 text-gray-900 min-h-screen flex flex-col`}>
         <SessionWrapper>
           <Navbar />
-          <main className="flex-grow">{children}</main>
+          <main className="flex-grow">
+            {children}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: "#333",
+                  color: "#fff",
+                },
+              }}
+            />
+          </main>
           <Footer className="mt-auto" />
         </SessionWrapper>
       </body>

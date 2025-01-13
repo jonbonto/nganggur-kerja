@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import JobCard from '@/components/JobCard';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import Modal from '@/components/Modal';
 
 const JobListingsPage = () => {
   const { data: session } = useSession();
@@ -11,6 +12,8 @@ const JobListingsPage = () => {
   const [filters, setFilters] = useState({ search: '', category: '', location: '' });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [alertCriteria, setAlertCriteria] = useState({ category: '', location: '' });
 
   useEffect(() => {
     if (!session) return;
@@ -39,6 +42,25 @@ const JobListingsPage = () => {
     setPage(1); // Reset to first page on filter change
   };
 
+  // Function to trigger the modal
+  const handleAlertClick = () => {
+    setShowModal(true);
+  };
+
+  const handleAlertClose = () => {
+    setShowModal(false);
+  };
+
+  const handleAlertSubmit = async () => {
+    // Send the alert criteria to the backend
+    await fetch('/api/job-alerts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ criteria: alertCriteria }),
+    });
+    setShowModal(false); // Close the modal after submitting
+  };
+
   return (
     <div className="container mx-auto px-4 py-16">
       <div className='flex justify-between'>
@@ -48,11 +70,18 @@ const JobListingsPage = () => {
 
       {/* Post Job Button for Employers */}
       {session?.user.role === 'employer' && (
+        <div>
         <Link href="/jobs/post">
           <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
             Post Job
           </button>
         </Link>
+        <Link href="/jobs/bulk">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            Bulk Job
+          </button>
+        </Link>
+        </div>
       )}
       </div>
 
@@ -86,6 +115,14 @@ const JobListingsPage = () => {
           <option value="">All Locations</option>
           {/* Add location options */}
         </select>
+
+        {/* Set Alert Button */}
+        <button
+            className="bg-blue-600 text-white p-3 rounded-md"
+            onClick={handleAlertClick}
+          >
+            Set Job Alert
+          </button>
       </div>
 
       {/* Job Cards */}
@@ -115,6 +152,36 @@ const JobListingsPage = () => {
           Next
         </button>
       </div>
+      {/* Modal for Setting Alerts */}
+      {showModal && (
+          <Modal onClose={handleAlertClose}>
+            <h3 className="text-xl font-semibold mb-4">Set Job Alert</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Category"
+                value={alertCriteria.category}
+                onChange={(e) => setAlertCriteria({ ...alertCriteria, category: e.target.value })}
+                className="p-2 border rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="Location"
+                value={alertCriteria.location}
+                onChange={(e) => setAlertCriteria({ ...alertCriteria, location: e.target.value })}
+                className="p-2 border rounded-md"
+              />
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                className="bg-blue-600 text-white px-6 py-2 rounded-md"
+                onClick={handleAlertSubmit}
+              >
+                Save Alert
+              </button>
+            </div>
+          </Modal>
+        )}
     </div>
   );
 };

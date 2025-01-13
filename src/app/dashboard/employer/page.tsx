@@ -1,61 +1,77 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';// Assuming you're using Prisma for DB access
-import { JobPostDTO } from '@/models/JobPostDTO'; // Assuming you have a DTO for Job Posts
+import React, { useEffect, useState } from 'react';
+import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+
+const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f7f'];
 
 const EmployerDashboard: React.FC = () => {
-  const { data: session, status } = useSession();
-  const [postedJobs, setPostedJobs] = useState<JobPostDTO[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.id) {
-      const fetchJobs = async () => {
-        const response = await fetch(`/api/jobs?userId=${session.user.id}`);
-        const data = await response.json();
-        setPostedJobs(data.jobs); // This will be a list of jobs posted by the employer
-      };
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch('/api/jobs/analytics');
+        const result = await response.json();
+        if (result.data) {
+          setAnalyticsData(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch analytics data:', error);
+      }
+    };
 
-      fetchJobs();
-    }
-  }, [status, session?.user?.id]);
+    fetchAnalytics();
+  }, []);
 
-  if (status === 'loading') return <p>Loading...</p>;
-  if (status === 'unauthenticated') return <p>Please sign in to view your dashboard.</p>;
+  if (analyticsData.length === 0) {
+    return <p>Loading analytics...</p>;
+  }
 
   return (
-    <section className="py-16 bg-gray-100">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-semibold text-center mb-8">Employer Dashboard</h2>
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-semibold mb-8">Employer Dashboard</h1>
 
-        <div className="mb-8">
-          <h3 className="text-2xl font-medium mb-4">Your Posted Jobs</h3>
-          {postedJobs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {postedJobs.map((job) => (
-                <div key={job.id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg">
-                  <h3 className="text-xl font-semibold">{job.title}</h3>
-                  <p className="text-gray-600">{job.company}</p>
-                  <p className="text-gray-800 mt-2">{job.description}</p>
-                  <Link href={`/jobs/${job.id}/applications`} className="text-blue-600 mt-4 inline-block">
-                    View Applications
-                  </Link>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>You have not posted any jobs yet.</p>
-          )}
-        </div>
+      {analyticsData.map((job, index) => (
+        <div key={index} className="mb-10">
+          <h2 className="text-2xl font-bold mb-4">{job.jobTitle}</h2>
 
-        <div className="mb-8">
-          <Link href="/jobs/post" className="bg-blue-600 text-white py-2 px-6 rounded-md">
-            Post a New Job
-          </Link>
+          {/* Device Usage Chart */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Device Usage</h3>
+            <PieChart width={400} height={300}>
+              <Pie
+                data={job.devices}
+                dataKey="count"
+                nameKey="type"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                fill="#8884d8"
+                label
+              >
+                {job.devices.map((entry, idx) => (
+                  <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </div>
+
+          {/* Location Bar Chart */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Views by Location</h3>
+            <BarChart width={500} height={300} data={job.locations}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="place" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#82ca9d" />
+            </BarChart>
+          </div>
         </div>
-      </div>
-    </section>
+      ))}
+    </div>
   );
 };
 

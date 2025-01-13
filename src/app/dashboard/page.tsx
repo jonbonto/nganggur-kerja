@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { JobPostDTO } from '@/models/JobPostDTO';
 // import { JobApplicationDTO } from '@/models/JobApplicationDTO'; // Assuming you have a DTO for Job Applications
 
 const Dashboard: React.FC = () => {
   const { data: session, status } = useSession();
   const [applications, setApplications] = useState<any[]>([]);
+  const [savedJobs, setSavedJobs] = useState<JobPostDTO[]>([]);
   const router = useRouter()
 
   useEffect(() => {
@@ -22,7 +24,14 @@ const Dashboard: React.FC = () => {
         setApplications(data.applications); // This could be a list of job applications
       };
 
+      const fetchSavedJobs = async () => {
+        const response = await fetch('/api/users/saved-jobs');
+        const data = await response.json();
+        setSavedJobs(data.savedJobs);
+      };
+  
       fetchApplications();
+      fetchSavedJobs();
     }
   }, [status, session?.user?.id]);
 
@@ -53,6 +62,24 @@ const Dashboard: React.FC = () => {
             <p>You have not applied to any jobs yet.</p>
           )}
         </div>
+<div className="mb-8">
+        <h3 className="text-2xl font-medium">Your Saved Jobs</h3>
+      <div className="mt-4">
+        {savedJobs.length > 0 ? (
+          savedJobs.map((job) => (
+            <div key={job.id} className="saved-job-item">
+              <h3>{job.title}</h3>
+              <p>{job.company}</p>
+              <Link href={`/jobs/${job.id}`} className="text-blue-600 mt-4 inline-block">
+                    View job
+                  </Link>
+            </div>
+          ))
+        ) : (
+          <p>You haven't saved any jobs yet.</p>
+        )}
+      </div>
+      </div>
 
         <div className="mb-8">
           <h3 className="text-2xl font-medium mb-4">Profile</h3>

@@ -22,6 +22,7 @@ const JobDetailsPage: React.FC = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [coverLetter, setCoverLetter] = useState('');
   const [resumeUrl, setResumeUrl] = useState('');
+  const [isSaved, setIsSaved] = useState(false);
 
   const {id: jobId} = useParams();
 
@@ -47,9 +48,20 @@ const JobDetailsPage: React.FC = () => {
       }
     };
 
+    const trackUniqueView = async () => {
+      try {
+        await fetch(`/api/jobs/${jobId}/track-views`, {
+          method: 'POST',
+        });
+      } catch (error) {
+        console.error('Failed to track unique job view:', error);
+      }
+    };
+
     if (jobId) {
       fetchJobDetails();
       fetchUserRole()
+      trackUniqueView();
     }
   }, [jobId]);
 
@@ -62,6 +74,25 @@ const JobDetailsPage: React.FC = () => {
     const data = await res.json();
     if (data.message) {
       alert(data.message); // Simple feedback to the user
+    }
+  };
+  
+  const handleSaveJob = async () => {
+    const response = await fetch('/api/jobs/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ jobId: job.id }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setIsSaved(true);
+      alert('Job saved successfully');
+    } else {
+      alert(data.message || 'Error saving job');
     }
   };
 
@@ -78,84 +109,119 @@ const JobDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto py-16 px-4">
-      <h1 className="text-3xl font-bold mb-4">{job.title}</h1>
-      <p className="text-lg text-gray-700 mb-2">{job.company}</p>
-      <p className="text-md text-gray-600 mb-6">{job.location}</p>
+    <div className="container mx-auto py-16 px-6 max-w-4xl">
+  {/* Job Header with Save Job Button */}
+  <div className="flex justify-between items-center mb-6">
+    <div>
+      <h1 className="text-4xl font-bold text-gray-900 mb-1">{job.title}</h1>
+      <p className="text-lg font-medium text-gray-700">{job.company} | {job.location}</p>
+    </div>
+    {userRole === 'user' && (
+      <div>
+        {/* Save Job Button */}
+        {!isSaved ? (
+          <button
+            onClick={handleSaveJob}
+            className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+          >
+            Save Job
+          </button>
+        ) : (
+          <button className="px-6 py-3 bg-gray-600 text-white rounded-md cursor-not-allowed">
+            Job Saved
+          </button>
+        )}
+      </div>
+    )}
+  </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Job Description</h2>
-        <p className="text-gray-800 mb-4">{job.description}</p>
+  {/* Job Description Section */}
+  <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
+    <h2 className="text-2xl font-semibold text-gray-800 mb-4">Job Description</h2>
+    <p className="text-gray-700 leading-relaxed">{job.description}</p>
+  </div>
 
-        {/* <h3 className="text-lg font-semibold mb-2">Requirements</h3>
-        <ul className="list-disc ml-6 mb-4">
+  {/* Requirements & Benefits Section */}
+  <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+    <div className="grid grid-cols-2 gap-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">Requirements</h3>
+        <ul className="list-disc ml-6 space-y-2">
           {job.requirements.map((req, index) => (
-            <li key={index} className="text-gray-800">
-              {req}
-            </li>
+            <li key={index} className="text-gray-600">{req}</li>
           ))}
         </ul>
-
-        <h3 className="text-lg font-semibold mb-2">Benefits</h3>
-        <ul className="list-disc ml-6">
-          {job.benefits.map((benefit, index) => (
-            <li key={index} className="text-gray-800">
-              {benefit}
-            </li>
-          ))}
-        </ul> */}
       </div>
-
-      <div className="mt-8 flex justify-between items-center">
-        {userRole === 'user' && (
-          <div>
-            <h4 className="mt-6 text-lg font-semibold">Apply for this job</h4>
-            <div>
-              <label>Cover Letter</label>
-              <textarea
-                value={coverLetter}
-                onChange={(e) => setCoverLetter(e.target.value)}
-                className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-                rows={4}
-              ></textarea>
-            </div>
-            <div className="mt-4">
-              <label>Resume URL</label>
-              <input
-                type="text"
-                value={resumeUrl}
-                onChange={(e) => setResumeUrl(e.target.value)}
-                className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-              />
-            </div>
-
-            <button
-              onClick={handleApply}
-              className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
-            >
-              Apply Now
-            </button>
-          </div>
-        )}
-
-        { userRole === 'employer' &&
-          <button
-            onClick={() => router.push(`/jobs/${jobId}/applications`)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          >
-            See Applications
-          </button>
-        }
-
-        <button
-          onClick={() => router.push('/jobs')}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
-          Back to Listings
-        </button>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">Benefits</h3>
+        <ul className="list-disc ml-6 space-y-2">
+          {job.benefits.map((benefit, index) => (
+            <li key={index} className="text-gray-600">{benefit}</li>
+          ))}
+        </ul>
       </div>
     </div>
-  );
+  </div>
+
+  {/* Application Section for Users */}
+  {userRole === 'user' && (
+    <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+      <h4 className="text-xl font-semibold text-gray-800 mb-4">Apply for this Job</h4>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-gray-700 font-medium">Cover Letter</label>
+          <textarea
+            value={coverLetter}
+            onChange={(e) => setCoverLetter(e.target.value)}
+            className="w-full p-4 mt-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"
+            rows={4}
+          ></textarea>
+        </div>
+
+        <div>
+          <label className="block text-gray-700 font-medium">Resume URL</label>
+          <input
+            type="text"
+            value={resumeUrl}
+            onChange={(e) => setResumeUrl(e.target.value)}
+            className="w-full p-4 mt-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            onClick={handleApply}
+            className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition duration-300 mt-4"
+          >
+            Apply Now
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* Employer Section */}
+    <div className="mt-8 flex justify-end items-center">
+  {userRole === 'employer' && (
+      <button
+        onClick={() => router.push(`/jobs/${jobId}/applications`)}
+        className="me-auto bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-300"
+      >
+        See Applications
+      </button>
+  )}
+    <button
+      onClick={() => router.push('/jobs')}
+      className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-300"
+    >
+      Back to Listings
+    </button>
+    </div>
+
+</div>
+
+  )
+    
 };
 
 export default JobDetailsPage;
