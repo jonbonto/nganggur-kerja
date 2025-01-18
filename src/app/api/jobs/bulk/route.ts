@@ -37,13 +37,14 @@ export async function POST(req: NextRequest) {
   const history = await prisma.uploadHistory.create({
     data: {
       filename: file.name,
-      creatorId: token.id,
+      creatorId: token.id as number,
       status: "in_progress",
     },
   });
 
    // Process the file asynchronously
    (async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorRows: any[] = [];
     let total = 0;
     let completed = 0;
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
         parse({ columns: true, trim: true, skip_empty_lines: true })
       );
       
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const row of countParser) {
         total++;
       }
@@ -91,7 +93,7 @@ export async function POST(req: NextRequest) {
           
           completed++;
         } catch (error) {
-          errorRows.push({ ...row, error: error.message, number: total });
+          errorRows.push({ ...row, error: (error as Error).message, number: total });
         }
 
         // Update progress
@@ -153,20 +155,20 @@ export async function POST(req: NextRequest) {
 }
 
 // Error file download
-export async function handleErrorFile(req: NextRequest) {
-  const url = new URL(req.url);
-  const sessionId = url.searchParams.get('sessionId');
-  const errorFilePath = `/tmp/${sessionId}-errors.csv`;
+// export async function handleErrorFile(req: NextRequest) {
+//   const url = new URL(req.url);
+//   const sessionId = url.searchParams.get('sessionId');
+//   const errorFilePath = `/tmp/${sessionId}-errors.csv`;
 
-  if (!fs.existsSync(errorFilePath)) {
-    return NextResponse.json({ message: 'Error file not found' }, { status: 404 });
-  }
+//   if (!fs.existsSync(errorFilePath)) {
+//     return NextResponse.json({ message: 'Error file not found' }, { status: 404 });
+//   }
 
-  const errorFileStream = fs.createReadStream(errorFilePath);
-  return new NextResponse(errorFileStream, {
-    headers: {
-      'Content-Type': 'text/csv',
-      'Content-Disposition': `attachment; filename="${sessionId}-errors.csv"`,
-    },
-  });
-}
+//   const errorFileStream = fs.createReadStream(errorFilePath);
+//   return new NextResponse(errorFileStream, {
+//     headers: {
+//       'Content-Type': 'text/csv',
+//       'Content-Disposition': `attachment; filename="${sessionId}-errors.csv"`,
+//     },
+//   });
+// }

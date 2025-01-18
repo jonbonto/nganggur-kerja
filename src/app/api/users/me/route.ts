@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Ensure you are using the correct Prisma import
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
+import { AppSession } from '@/types';
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     // Retrieve the current session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions) as AppSession;
 
     // If no session, return an unauthorized response
     if (!session || !session.user) {

@@ -1,13 +1,15 @@
 // src/app/api/job-applications/route.ts
 
+import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
-import { getSession } from 'next-auth/react';
+import { AppSession } from '@/types';
+import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const { jobId, coverLetter, resumeUrl } = await request.json();
   
-  const session = await getSession();
+  const session = await getServerSession(authOptions) as AppSession;
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -25,8 +27,8 @@ export async function POST(request: Request) {
   return NextResponse.json(application);
 }
 
-export async function GET(request: Request) {
-  const session = await getSession();
+export async function GET() {
+  const session = await getServerSession(authOptions) as AppSession;
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

@@ -7,7 +7,7 @@ import { JobPostValidator } from '@/services/JobPostValidator';
 import { JobPostAPI } from '@/services/JobPostApi';
 
 const JobPostForm: React.FC = () => {
-  const [jobDetails, setJobDetails] = useState<JobPostDTO>({
+  const [jobDetails, setJobDetails] = useState<Partial<JobPostDTO>>({
     title: '',
     company: '',
     category: '',
@@ -31,14 +31,14 @@ const JobPostForm: React.FC = () => {
     e.preventDefault();
 
     // Validate input using the Validator service
-    const validationError = JobPostValidator.validate(jobDetails);
+    const validationError = JobPostValidator.validate(jobDetails as JobPostDTO);
     if (validationError) {
       setError(validationError);
       return;
     }
 
     // Call the API to submit the job using JobPostAPI service
-    const isSuccess = await JobPostAPI.postJob(jobDetails);
+    const isSuccess = await JobPostAPI.postJob(jobDetails as JobPostDTO);
     if (isSuccess) {
       router.push('/jobs');
     } else {

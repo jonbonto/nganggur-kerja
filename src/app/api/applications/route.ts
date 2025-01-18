@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Import your Prisma client
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
+import { AppSession } from '@/types';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     const { jobId, coverLetter, resumeUrl } = await req.json();
       
-      const session = await getServerSession(authOptions);
+      const session = await getServerSession(authOptions) as AppSession;
       if (!session || !session.user || session.user.role !== 'user') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
@@ -40,12 +41,12 @@ export async function POST(req: Request) {
             return NextResponse.json(application);
       } catch (error) {
         console.error(error)
-        return NextResponse.json({ error: error.message});
+        return NextResponse.json({ error: (error as Error).message });
       } 
 }
 
-export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
+export async function GET() {
+  const session = await getServerSession(authOptions) as AppSession;
 
   if (!session?.user?.id) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

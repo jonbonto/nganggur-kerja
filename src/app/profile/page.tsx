@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -49,7 +48,7 @@ const ProfileManagement = () => {
         throw new Error(data.message);
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to update profile');
+      toast.error((error as Error).message || 'Failed to update profile');
     }
   };
 
@@ -75,7 +74,7 @@ const ProfileManagement = () => {
         throw new Error(data.message);
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to change password');
+      toast.error((error as Error).message || 'Failed to change password');
     }
   };
 

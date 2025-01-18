@@ -1,12 +1,14 @@
 'use client'
 
+import { AppSession } from '@/types';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const Navbar: React.FC = () => {
-  const { status, data: session } = useSession(); // Get session info
+  const { status, data } = useSession(); // Get session info
+  const session = data as AppSession;
   const pathname = usePathname(); // Client-side hook to get pathname
   const [showNavbar, setShowNavbar] = useState(true);
 

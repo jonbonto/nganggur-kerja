@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { getSession } from 'next-auth/react';
+import { AppSession } from '@/types';
 
 interface JobDetailsProps {
   id: string;
@@ -34,15 +35,15 @@ const JobDetailsPage: React.FC = () => {
         if (!response.ok) throw new Error('Failed to fetch job details');
         const data = await response.json();
         setJob(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     };
 
     const fetchUserRole = async () => {
-      const session = await getSession();
+      const session = await getSession() as AppSession;
       if (session && session.user?.role) {
         setUserRole(session.user?.role);
       }
@@ -83,7 +84,7 @@ const JobDetailsPage: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ jobId: job.id }),
+      body: JSON.stringify({ jobId: job?.id }),
     });
 
     const data = await response.json();

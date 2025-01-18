@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token) {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const existingSavedJob = await prisma.savedJob.findUnique({
       where: {
         userId_jobId: {
-          userId: token.id,
+          userId: token.id as number,
           jobId: jobId,
         },
       },
@@ -33,13 +33,13 @@ export async function POST(req: Request) {
     // Save the job for the user
     await prisma.savedJob.create({
       data: {
-        userId: token.id,
+        userId: token.id as number,
         jobId: jobId,
       },
     });
 
     return NextResponse.json({ message: 'Job saved successfully' }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ message: 'Failed to save job', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to save job', error: (error as Error).message }, { status: 500 });
   }
 }

@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token) {
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   try {
     const savedJobs = await prisma.savedJob.findMany({
       where: {
-        userId: token.id,
+        userId: token.id as number,
       },
       include: {
         job: true, // Include the job details
@@ -23,6 +23,6 @@ export async function GET(req: Request) {
       savedJobs: savedJobs.map((savedJob) => savedJob.job),
     });
   } catch (error) {
-    return NextResponse.json({ message: 'Failed to fetch saved jobs', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to fetch saved jobs', error: (error as Error).message }, { status: 500 });
   }
 }

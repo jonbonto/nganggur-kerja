@@ -1,19 +1,19 @@
 // /api/auth/forgot-password.ts
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 // import { sendPasswordResetEmail } from '@/lib/email';
 import crypto from 'crypto';
 
-const forgotPasswordHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+const forgotPasswordHandler = async (req: NextRequest) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
+    return NextResponse.json({ message: 'Method Not Allowed' }, { status: 405 });
   }
 
-  const { email } = req.body;
+  const { email } = await req.json();
 
   if (!email || !/\S+@\S+\.\S+/.test(email)) {
-    return res.status(400).json({ message: 'Invalid email address' });
+    return NextResponse.json({ message: 'Invalid email address' }, { status: 400 });
   }
 
   // Check if user exists
@@ -22,7 +22,7 @@ const forgotPasswordHandler = async (req: NextApiRequest, res: NextApiResponse) 
   });
 
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return NextResponse.json({ message: 'User not found' }, { status: 404 });
   }
 
   // Generate a reset token (using crypto for simplicity)
@@ -42,10 +42,10 @@ const forgotPasswordHandler = async (req: NextApiRequest, res: NextApiResponse) 
   try {
     // await sendPasswordResetEmail(email, resetLink);
     console.log(resetLink, "sendEmail")
-    res.status(200).json({ success: true });
+    NextResponse.json({ success: true });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    res.status(500).json({ message: 'Failed to send reset link' });
+    NextResponse.json({ message: 'Failed to send reset link' }, { status: 500 });
   }
 };
 

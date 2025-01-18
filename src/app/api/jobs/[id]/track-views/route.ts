@@ -1,11 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 import { UAParser } from 'ua-parser-js';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const jobId = parseInt(params.id);
+  const { id } = await params;
+  const jobId = parseInt(id);
 
   if (!token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -49,7 +50,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       where: {
         jobId_userId: {
           jobId,
-          userId: token.id,
+          userId: token.id as number,
         },
       },
     });
@@ -59,7 +60,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       await prisma.jobView.create({
         data: {
           jobId,
-          userId: token.id,
+          userId: token.id as number,
           location,
           device,
           referrer,

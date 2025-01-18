@@ -1,18 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Make sure to use the correct import for Prisma
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
+import { AppSession } from '@/types';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions); // Get the user session
+    const session = await getServerSession(authOptions) as AppSession; // Get the user session
 
     if (!session || !session.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     // Ensure the user is updating their own profile
-    if (session.user.id !== parseInt(params.id)) {
+    if (session.user.id !== parseInt((await params).id)) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 

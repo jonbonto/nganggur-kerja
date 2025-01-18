@@ -5,10 +5,12 @@ import JobCard from '@/components/JobCard';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Modal from '@/components/Modal';
+import { AppSession } from '@/types';
 
 const JobListingsPage = () => {
-  const { data: session } = useSession();
-  const [jobs, setJobs] = useState([]);
+  const { data } = useSession();
+  const session = data as AppSession;
+  const [jobs, setJobs] = useState<{ id: string; title: string; company: string; location: string }[]>([]);
   const [filters, setFilters] = useState({ search: '', category: '', location: '' });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -65,7 +67,7 @@ const JobListingsPage = () => {
     <div className="container mx-auto px-4 py-16">
       <div className='flex justify-between'>
       <h1 className="text-4xl font-semibold text-center mb-8">
-        {session?.user.role === 'employer' ? 'Your Posted Jobs' : 'Available Jobs'}
+        {session?.user?.role === 'employer' ? 'Your Posted Jobs' : 'Available Jobs'}
       </h1>
 
       {/* Post Job Button for Employers */}

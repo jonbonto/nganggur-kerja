@@ -1,11 +1,12 @@
 'use client';
 
+import { HistoryRecord } from '@/types';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 const BulkJobUpload = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const rowsPerPage = 2;
@@ -44,7 +45,7 @@ const BulkJobUpload = () => {
       toast.success(data.message);
       fetchHistory(currentPage);
     } catch (error) {
-      toast.error(error.message || 'Error uploading file');
+      toast.error((error as Error).message || 'Error uploading file');
     }
   };
 

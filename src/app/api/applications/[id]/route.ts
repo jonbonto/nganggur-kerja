@@ -1,17 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Import your Prisma client
-import { getServerSession } from 'next-auth';
+import { getServerSession, Session } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Get session data (user info) from the JWT or session
-    const session = await getServerSession(authOptions); // Ensure this gives you the current logged-in user
+    const session = await getServerSession(authOptions) as Session & { user: { id: string } }; // Ensure this gives you the current logged-in user
     if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 }); // If no session or user ID, return Unauthorized
     }
 
-    const { id: applicationId} = params;
+    const { id: applicationId} = await params;
     const { status } = await req.json();
 
     // Check if status is valid
@@ -37,7 +37,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     });
 
     // If the job is not found or postedById does not match userId, return Unauthorized
-    if (!job || job.postedById !== session.user.id) {
+    if (!job || job.postedById !== parseInt(session.user.id)) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,12 +6,15 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { JobPostDTO } from '@/models/JobPostDTO';
+import { AppSession } from '@/types';
+import Image from 'next/image';
 
 const Dashboard: React.FC = () => {
-  const { data: session, status } = useSession();
+  const { data, status } = useSession();
   const [applications, setApplications] = useState<any[]>([]);
   const [savedJobs, setSavedJobs] = useState<JobPostDTO[]>([]);
   const router = useRouter();
+  const session = data as AppSession & { user: { profilePicture: string } };
 
   useEffect(() => {
     if (session?.user?.role === 'employer') {
@@ -33,7 +37,7 @@ const Dashboard: React.FC = () => {
       fetchApplications();
       fetchSavedJobs();
     }
-  }, [status, session?.user?.id, router]);
+  }, [status, session?.user, router]);
 
   if (status === 'loading') return <p>Loading...</p>;
   if (status === 'unauthenticated') return <p>Please sign in to view your dashboard.</p>;
@@ -54,7 +58,7 @@ const Dashboard: React.FC = () => {
             <div className="flex justify-center items-center">
               {/* Profile Image */}
               <div className="relative w-32 h-32">
-                <img
+                <Image
                   src={session?.user?.profilePicture || '/default-profile.png'}
                   alt="Profile"
                   className="w-full h-full rounded-full object-cover"
@@ -94,7 +98,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-700">You haven't saved any jobs yet.</p>
+                <p className="text-gray-700">You haven&apos;t saved any jobs yet.</p>
               )}
             </div>
             <Link href="/saved-jobs" className="text-blue-600 mt-4 inline-block hover:underline">Show More</Link>

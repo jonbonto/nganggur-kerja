@@ -1,11 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
 
 const UsersManagement: React.FC = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean | number>(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -17,7 +25,7 @@ const UsersManagement: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = (userId: number) => async () => {
     const response = await fetch(`/api/admin/users/${userId}`, {
       method: 'DELETE',
     });
@@ -27,9 +35,8 @@ const UsersManagement: React.FC = () => {
     }
   };
 
-  const handlePromoteUser = async () => {
-    setIsLoading(true);
-    setMessage(null);
+  const handlePromoteUser = (userId: number) => async () => {
+    setIsLoading(userId);
 
     try {
       const response = await fetch('/api/admin/promoteUser', {
@@ -37,18 +44,19 @@ const UsersManagement: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({ userId }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(data.message);
+        toast.success('User promoted successfully');
       } else {
-        setMessage(data.message);
+        toast.error(data.message || 'Failed to promote user');
       }
     } catch (error) {
-      setMessage('Failed to promote user.');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to promote user';
+        toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -73,16 +81,16 @@ const UsersManagement: React.FC = () => {
               <td className="border border-gray-300 px-4 py-2">{user.email}</td>
               <td className="border border-gray-300 px-4 py-2">{user.role}</td>
               <td className="border border-gray-300 px-4 py-2">
-                <button onClick={() => handleDeleteUser(user.id)} className="bg-red-600 text-white px-4 py-2 rounded-md">
+                <button onClick={handleDeleteUser(user.id)} className="bg-red-600 text-white px-4 py-2 rounded-md">
                   Delete
                 </button>
                 {user.role !== 'admin' && 
                     <button
-                        onClick={handlePromoteUser}
-                        disabled={isLoading}
-                        className="bg-blue-600 text-white py-2 px-6 rounded-md disabled:opacity-50"
+                        onClick={handlePromoteUser(user.id)}
+                        disabled={!!isLoading}
+                        className="bg-blue-600 text-white py-2 px-6 rounded-md disabled:opacity-50 ms-1"
                     >
-                        {isLoading ? 'Promoting...' : 'Make Admin'}
+                        {isLoading === user.id ? 'Promoting..' : 'Make Admin'}
                     </button>
                 }
               </td>

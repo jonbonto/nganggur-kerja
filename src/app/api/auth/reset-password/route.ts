@@ -1,18 +1,18 @@
 // /api/auth/reset-password.ts
 
-import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { NextRequest, NextResponse } from 'next/server';
 
-const resetPasswordHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+const resetPasswordHandler = async (req: NextRequest) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
+    return NextResponse.json({ message: 'Method Not Allowed' }, { status: 405 });
   }
 
-  const { token, password } = req.body;
+  const { token, password } = await req.json();
 
   if (!token || !password) {
-    return res.status(400).json({ message: 'Missing required fields' });
+    return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
   }
 
   // Find the reset token in the database
@@ -21,7 +21,7 @@ const resetPasswordHandler = async (req: NextApiRequest, res: NextApiResponse) =
   });
 
   if (!resetRequest || resetRequest.expiresAt < new Date()) {
-    return res.status(400).json({ message: 'Invalid or expired token' });
+    return NextResponse.json({ message: 'Invalid or expired token' }, { status: 400 });
   }
 
   // Hash the new password
@@ -38,7 +38,7 @@ const resetPasswordHandler = async (req: NextApiRequest, res: NextApiResponse) =
     where: { token },
   });
 
-  res.status(200).json({ success: true });
+  NextResponse.json({ success: true });
 };
 
 export { resetPasswordHandler as POST };

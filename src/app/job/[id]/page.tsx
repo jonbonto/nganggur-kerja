@@ -1,9 +1,9 @@
 type Props = {
-    params: { id: string };
+    params: Promise<{ id: string }>;
   };
   
-  export default function JobDetails({ params }: Props) {
-    const { id } = params;
+  export default async function JobDetails({ params }: Props) {
+    const { id } = await params;
   
     // Fetch job details using `id` if connected to backend
   

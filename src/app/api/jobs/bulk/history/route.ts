@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { getToken } from "next-auth/jwt";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const creatorId = token.id
+  const creatorId = token?.id
 
   if (!creatorId) {
     return NextResponse.json({ message: "Employer ID is required" }, { status: 400 });
@@ -38,6 +38,6 @@ export async function GET(req: Request) {
       totalRecords,
     });
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
   }
 }

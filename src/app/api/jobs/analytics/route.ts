@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token || token.role !== 'employer') {
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   try {
     // Aggregate data for the employer's jobs
     const analytics = await prisma.job.findMany({
-      where: { postedById: token.id },
+      where: { postedById: token.id as number },
       select: {
         title: true,
         jobViews: {

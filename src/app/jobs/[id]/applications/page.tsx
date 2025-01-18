@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { Application } from '@/types';
 
 const JobApplications = () => {
-  const [applications, setApplications] = useState([]);
+  
+  const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [error, setError] = useState(''); // Error state
   const [filter, setFilter] = useState<string>('all'); // Filter state for status
   const { id } = useParams();
   const router = useRouter();
@@ -16,7 +18,7 @@ const JobApplications = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       setLoading(true);
-      setError(null); // Reset error state before each fetch
+      setError(''); // Reset error state before each fetch
 
       if (id) {
         try {
@@ -35,7 +37,7 @@ const JobApplications = () => {
 
           setApplications(data.applications);
         } catch (error) {
-          setError(error.message);
+          setError((error as Error).message);
         } finally {
           setLoading(false);
         }
@@ -69,7 +71,7 @@ const JobApplications = () => {
         )
       );
     } catch (error) {
-      toast.error(error.message || 'An error occurred while updating status');
+      toast.error((error as Error).message || 'An error occurred while updating status');
     }
   };
 
@@ -120,7 +122,7 @@ const JobApplications = () => {
 
         {/* Application List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {applications.map((application: any) => (
+          {applications.map((application: Application) => (
             <div
               key={application.id}
               className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow duration-300"

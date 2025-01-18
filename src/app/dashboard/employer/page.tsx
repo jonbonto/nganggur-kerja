@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGri
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f7f'];
 
 const EmployerDashboard: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [analyticsData, setAnalyticsData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -50,7 +51,7 @@ const EmployerDashboard: React.FC = () => {
                 fill="#8884d8"
                 label
               >
-                {job.devices.map((entry, idx) => (
+                {job.devices.map((entry: { type: string; count: number }, idx: number) => (
                   <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                 ))}
               </Pie>

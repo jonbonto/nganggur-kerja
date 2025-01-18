@@ -8,12 +8,13 @@ cron.schedule('0 0 * * *', async () => {
     include: { user: true }, // Include user data to send emails
   });
 
-  alerts.forEach(async (alert) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  alerts.forEach(async (alert: { criteria: any, user: { email: string } }) => {
     const matchingJobs = await prisma.job.findMany({
       where: {
         AND: [
-          { category: alert.criteria.category },
-          { location: alert.criteria.location },
+          { category: alert?.criteria?.category },
+          { location: alert?.criteria?.location },
         ],
       },
     });

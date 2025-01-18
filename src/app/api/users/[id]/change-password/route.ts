@@ -1,19 +1,20 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Correct import for Prisma
 import bcrypt from 'bcryptjs'; // Custom auth helper to get user session
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
+import { AppSession } from '@/types';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions); // Get the user session
+    const session = await getServerSession(authOptions) as AppSession; // Get the user session
 
     if (!session || !session.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     // Ensure the user is changing their own password
-    if (session.user.id !== parseInt(params.id)) {
+    if (session.user.id !== parseInt((await params).id)) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
@@ -28,7 +29,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       where: { id: session.user.id },
     });
 
-    if (!user || !(bcrypt.compareSync(currentPassword, user.hashedPassword))) {
+    if (!user || !(bcrypt.compareSync(currentPassword, user.hashedPassword!))) {
       return NextResponse.json({ message: 'Invalid current password' }, { status: 400 });
     }
 

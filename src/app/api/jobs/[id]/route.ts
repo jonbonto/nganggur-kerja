@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
   try {
     const job = await prisma.job.findUnique({
@@ -16,7 +16,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json(job);
   } catch (error) {
     return NextResponse.json(
-      { message: 'Error fetching job details', error: error.message },
+      { message: 'Error fetching job details', error:  (error as Error).message },
       { status: 500 }
     );
   }

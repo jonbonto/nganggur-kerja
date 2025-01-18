@@ -2,7 +2,7 @@
 
 'use client'
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
@@ -27,6 +27,7 @@ const SignUpForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const bodyData: any = {...formData}
     const role = searchParams.get('role')
     if (role) {
@@ -134,4 +135,12 @@ const SignUpForm: React.FC = () => {
   );
 };
 
-export default SignUpForm;
+const SignUpPage: React.FC = () => (
+  <Suspense fallback={<div>Loading search parameters...</div>}>
+    <SignUpForm />
+  </Suspense>
+);
+
+SignUpPage.displayName = 'SignUpPage';
+
+export default SignUpPage;
