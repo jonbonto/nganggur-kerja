@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const existingSavedJob = await prisma.savedJob.findUnique({
       where: {
         userId_jobId: {
-          userId: token.id as number,
+          userId: +(token.id as number),
           jobId: jobId,
         },
       },
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     // Save the job for the user
     await prisma.savedJob.create({
       data: {
-        userId: token.id as number,
+        userId: +(token.id as number),
         jobId: jobId,
       },
     });

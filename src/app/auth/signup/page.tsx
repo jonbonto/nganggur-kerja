@@ -44,7 +44,7 @@ const SignUpForm: React.FC = () => {
     if (res.ok) {
       const user = await res.json();
       // Automatically sign in the user after successful sign-up
-      signIn('credentials', { email: user.email, password: formData.password });
+      await signIn('credentials', { email: user.email, password: formData.password });
       router.push('/dashboard'); // Redirect to the dashboard or home page
     } else {
       setError('Error during signup, please try again.');

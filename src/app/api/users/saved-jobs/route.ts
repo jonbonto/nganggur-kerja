@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   try {
     const savedJobs = await prisma.savedJob.findMany({
       where: {
-        userId: token.id as number,
+        userId: +(token.id as number),
       },
       include: {
         job: true, // Include the job details

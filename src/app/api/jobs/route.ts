@@ -40,19 +40,25 @@ export async function GET(req: NextRequest) {
     };
     
     if (role === 'employer') {
-      where.postedById = token.id; // Filter jobs created by the logged-in employer
+      where.postedById = +(token.id as number); // Filter jobs created by the logged-in employer
     }
-  
-    const jobs = await prisma.job.findMany({
-      where,
-      skip: (Number(page) - 1) * Number(limit),
-      take: Number(limit),
-      orderBy: { createdAt: 'desc' },
-    });
-    const totalJobs = await prisma.job.count({ where });
-    const totalPages = Math.ceil(totalJobs / Number(limit));
-  
-    return NextResponse.json({ jobs, totalPages }, { status: 200 });
+    try {
+      const jobs = await prisma.job.findMany({
+        where,
+        skip: (Number(page) - 1) * Number(limit),
+        take: Number(limit),
+        orderBy: { createdAt: 'desc' },
+      });
+      
+    
+      
+      const totalJobs = await prisma.job.count({ where });
+      const totalPages = Math.ceil(totalJobs / Number(limit));
+    
+      return NextResponse.json({ jobs, totalPages }, { status: 200 });
+    } catch (error) {
+      console.log((error as Error).message);
+    }
 }
 
 export async function POST(req: NextRequest) {

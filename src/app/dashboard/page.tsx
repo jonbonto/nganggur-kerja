@@ -62,6 +62,8 @@ const Dashboard: React.FC = () => {
                   src={session?.user?.profilePicture || '/default-profile.png'}
                   alt="Profile"
                   className="w-full h-full rounded-full object-cover"
+                  width={300}
+                  height={300}
                 />
               </div>
             </div>

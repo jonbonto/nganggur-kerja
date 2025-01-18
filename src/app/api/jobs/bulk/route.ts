@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   const history = await prisma.uploadHistory.create({
     data: {
       filename: file.name,
-      creatorId: token.id as number,
+      creatorId: +(token.id as number),
       status: "in_progress",
     },
   });

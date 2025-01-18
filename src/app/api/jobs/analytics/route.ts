@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   try {
     // Aggregate data for the employer's jobs
     const analytics = await prisma.job.findMany({
-      where: { postedById: token.id as number },
+      where: { postedById: +(token.id as number) },
       select: {
         title: true,
         jobViews: {

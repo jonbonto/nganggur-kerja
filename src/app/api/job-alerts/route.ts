@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const alerts = await prisma.jobAlert.findMany({
-    where: { userId: token.id as number },
+    where: { userId: +(token.id as number) },
   });
   return NextResponse.json(alerts);
 }
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const { criteria } = await req.json();
   const newAlert = await prisma.jobAlert.create({
     data: {
-      userId: token.id as number,
+      userId: +(token.id as number),
       criteria,
     },
   });

@@ -50,7 +50,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       where: {
         jobId_userId: {
           jobId,
-          userId: token.id as number,
+          userId: +(token.id as number),
         },
       },
     });
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       await prisma.jobView.create({
         data: {
           jobId,
-          userId: token.id as number,
+          userId: +(token.id as number),
           location,
           device,
           referrer,
