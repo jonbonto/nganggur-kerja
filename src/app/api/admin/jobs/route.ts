@@ -84,7 +84,12 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Job ID and action are required' }, { status: 400 });
     }
 
-    let updateData = {};
+    let updateData: {
+      isApproved?: boolean;
+      isFlagged?: boolean;
+      flagReason?: string | null;
+      isActive?: boolean;
+    } = {};
 
     switch (action) {
       case 'approve':
