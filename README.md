@@ -10,6 +10,7 @@ The project evolved from an initial concept into a robust application with itera
 - **Framework:** Next.js 15
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui (for beta version)
 - **State Management:** React Context and useReducer
 - **Database:** PostgreSQL (via Prisma ORM)
 - **Authentication:** NextAuth.js (JWT-based)
@@ -17,6 +18,24 @@ The project evolved from an initial concept into a robust application with itera
 - **Toasts:** React Hot Toast
 - **Charts:** Recharts for analytics visualization
 - **Pagination:** Server-side pagination for scalable performance
+
+## Beta Version (A/B Testing)
+
+This project includes a **beta version** of all pages using shadcn/ui components for A/B testing purposes. The beta version provides a modern, consistent design system while maintaining all the original functionality.
+
+### Accessing Beta Pages
+- All beta pages are accessible via the `/beta` prefix
+- Example: `/beta`, `/beta/jobs`, `/beta/dashboard`, `/beta/auth/signin`
+- Users can switch between original and beta versions via footer links
+
+### Beta Features
+- Modern shadcn/ui component library
+- Consistent design tokens and theming
+- Improved accessibility
+- Enhanced mobile responsiveness
+- Dark mode support (via CSS variables)
+
+For more details, see [Beta A/B Testing Documentation](./src/app/beta/README.md).
 
 ## Complete Feature List
 
