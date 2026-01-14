@@ -18,6 +18,14 @@ model User {
   role           String           @default("user") // Default to "user"
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  // Job seeker profile fields
+  phone          String?
+  bio            String?
+  resumeUrl      String?
+  profilePicture String?
+  location       String?
+  isActive       Boolean          @default(true) // For admin to suspend/activate
+  lastLoginAt    DateTime?
   // Other fields as necessary
   passwordResets PasswordReset[]
   // Jobs posted by the user (if they're an employer)
@@ -28,6 +36,12 @@ model User {
   savedJobs      SavedJob[]
   jobAlerts      JobAlert[]
   uploadHistories  UploadHistory[]
+  // Job seeker profile relations
+  skills         Skill[]
+  experiences    Experience[]
+  educations     Education[]
+  // Company profile (if employer)
+  companyProfile CompanyProfile?
 
   @@map("users") // Custom table name as plural
 }
@@ -54,7 +68,7 @@ model PasswordReset {
 }
 
 model Job {
-  id           Int      @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   title        String
   company      String
   category     String
@@ -63,9 +77,14 @@ model Job {
   location     String
   requirements String[]
   benefits     String[]
-  views        Int      @default(0) // Optional: Track view
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  views        Int       @default(0) // Optional: Track view
+  isActive     Boolean   @default(true) // For archiving jobs
+  isApproved   Boolean   @default(true) // For admin moderation
+  expiresAt    DateTime? // Job expiration date
+  isFlagged    Boolean   @default(false) // For admin review
+  flagReason   String? // Reason for flagging
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   // Relation to JobApplication
   applications JobApplication[]
@@ -86,6 +105,7 @@ model JobApplication {
   coverLetter String?
   resumeUrl   String?
   status      String // status could be "pending", "accepted", "rejected"
+  notes       String? // Employer notes on application
   appliedAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -153,4 +173,71 @@ model UploadHistory {
   creatorId Int
 
   @@map("upload_history")
+}
+
+// New models for comprehensive features
+
+model Skill {
+  id        Int      @id @default(autoincrement())
+  name      String
+  level     String? // e.g., Beginner, Intermediate, Advanced, Expert
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("skills")
+}
+
+model Experience {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  company     String
+  position    String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("experiences")
+}
+
+model Education {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  institution String
+  degree      String
+  fieldOfStudy String?
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("educations")
+}
+
+model CompanyProfile {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique // One-to-one with User
+  companyName String
+  logo        String?
+  website     String?
+  industry    String?
+  size        String? // e.g., 1-10, 11-50, 51-200, 201-500, 501+
+  description String?
+  founded     Int? // Year founded
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("company_profiles")
 }
