@@ -10,28 +10,54 @@ The `/beta` route contains reimplemented versions of all major pages using moder
 
 ```
 /beta
-├── page.tsx                    # Beta home page
-├── layout.tsx                  # Beta layout with navigation
+├── page.tsx                         # Beta home page
+├── layout.tsx                       # Beta layout with navigation
 ├── jobs/
-│   ├── page.tsx               # Job listings
+│   ├── page.tsx                    # Job listings
+│   ├── post/
+│   │   └── page.tsx                # Post new job
+│   ├── bulk-upload/
+│   │   └── page.tsx                # Bulk CSV upload
 │   └── [id]/
-│       └── page.tsx           # Job details
+│       ├── page.tsx                # Job details
+│       └── applications/
+│           └── page.tsx            # Manage applications
+├── job/
+│   └── page.tsx                    # Simple job listing
 ├── dashboard/
-│   └── page.tsx               # User dashboard
+│   ├── page.tsx                    # Main dashboard
+│   ├── employer/
+│   │   └── page.tsx                # Employer dashboard
+│   ├── freelancer/
+│   │   └── page.tsx                # Job seeker dashboard
+│   └── job-alerts/
+│       └── page.tsx                # Job alerts management
 ├── profile/
-│   └── page.tsx               # User profile
+│   └── page.tsx                    # General profile
+├── employer/
+│   └── profile/
+│       └── page.tsx                # Company profile
+├── job-seeker/
+│   └── profile/
+│       └── page.tsx                # Job seeker profile
 ├── auth/
 │   ├── signin/
-│   │   └── page.tsx           # Sign in page
-│   └── signup/
-│       └── page.tsx           # Sign up page
-└── admin/
-    ├── dashboard/
-    │   └── page.tsx           # Admin dashboard
-    ├── users/
-    │   └── page.tsx           # User management
-    └── jobs/
-        └── page.tsx           # Job moderation
+│   │   └── page.tsx                # Sign in page
+│   ├── signup/
+│   │   └── page.tsx                # Sign up page
+│   ├── forgot-password/
+│   │   └── page.tsx                # Password reset request
+│   └── reset-password/
+│       └── page.tsx                # Password reset
+├── admin/
+│   ├── dashboard/
+│   │   └── page.tsx                # Admin dashboard
+│   ├── users/
+│   │   └── page.tsx                # User management
+│   └── jobs/
+│       └── page.tsx                # Job moderation
+└── unauthorized/
+    └── page.tsx                    # Access denied
 ```
 
 ## shadcn/ui Components Used
@@ -52,16 +78,43 @@ The beta pages utilize the following shadcn/ui components:
 - ✅ Modern UI patterns and interactions
 - ✅ Dark mode support (via CSS variables)
 
-### Pages Implemented
+### Pages Implemented (22 total)
+
+**Public Pages:**
 - ✅ Home page with hero, categories, and featured jobs
 - ✅ Job listings with filters and pagination
 - ✅ Job detail view with apply functionality
-- ✅ User dashboard with saved jobs and applications
-- ✅ Profile management
-- ✅ Authentication pages (sign in/sign up)
+- ✅ Simple job listing page
+
+**Authentication Pages:**
+- ✅ Sign in page
+- ✅ Sign up page
+- ✅ Forgot password page
+- ✅ Reset password page
+
+**Dashboard Pages:**
+- ✅ Main dashboard with saved jobs and applications
+- ✅ Employer dashboard with analytics tabs
+- ✅ Freelancer/Job seeker dashboard
+- ✅ Job alerts management
+
+**Profile Pages:**
+- ✅ General profile management
+- ✅ Company profile (employer)
+- ✅ Job seeker profile (skills, experience, education)
+
+**Job Management Pages:**
+- ✅ Post new job
+- ✅ Bulk CSV upload with history
+- ✅ Job applications management
+
+**Admin Pages:**
 - ✅ Admin dashboard with statistics
 - ✅ Admin user management
 - ✅ Admin job moderation
+
+**Other Pages:**
+- ✅ Unauthorized access page
 
 ## A/B Testing Strategy
 
