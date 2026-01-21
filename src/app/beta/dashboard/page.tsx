@@ -20,7 +20,7 @@ const BetaDashboard: React.FC = () => {
 
   useEffect(() => {
     if (session?.user?.role === 'employer') {
-      router.push('/dashboard/employer');
+      router.push('/beta/dashboard/employer');
     }
 
     if (status === 'authenticated' && session?.user?.id) {
@@ -112,7 +112,7 @@ const BetaDashboard: React.FC = () => {
             ) : (
               <p className="text-muted-foreground">You haven&apos;t saved any jobs yet.</p>
             )}
-            <Link href="/saved-jobs">
+            <Link href="/beta/saved-jobs">
               <Button variant="outline" className="w-full">Show More</Button>
             </Link>
           </CardContent>
@@ -134,7 +134,7 @@ const BetaDashboard: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-2">Status: {application.status}</p>
-                    <Link href={`/applications/${application.id}`}>
+                    <Link href={`/beta/applications/${application.id}`}>
                       <Button variant="link" className="p-0">View Details</Button>
                     </Link>
                   </CardContent>
@@ -143,7 +143,7 @@ const BetaDashboard: React.FC = () => {
             ) : (
               <p className="text-muted-foreground">You have not applied to any jobs yet.</p>
             )}
-            <Link href="/job-applications">
+            <Link href="/beta/job-applications">
               <Button variant="outline" className="w-full">Show More</Button>
             </Link>
           </CardContent>

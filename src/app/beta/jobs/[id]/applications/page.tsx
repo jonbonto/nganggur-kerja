@@ -25,7 +25,7 @@ const BetaJobApplications = () => {
           const res = await fetch(`/api/jobs/${id}/applications?status=${filter}`);
 
           if (res.status === 401) {
-            return router.push('/beta');
+            return router.push('/beta/auth/signin');
           }
 
           const data = await res.json();

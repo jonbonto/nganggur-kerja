@@ -52,10 +52,10 @@ const BetaJobListingsPage = () => {
 
         {session?.user.role === 'employer' && (
           <div className="flex gap-2">
-            <Link href="/jobs/post">
+            <Link href="/beta/jobs/post">
               <Button>Post Job</Button>
             </Link>
-            <Link href="/jobs/bulk">
+            <Link href="/beta/jobs/bulk-upload">
               <Button variant="outline">Bulk Upload</Button>
             </Link>
           </div>
